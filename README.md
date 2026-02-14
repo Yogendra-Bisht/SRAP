@@ -1,76 +1,176 @@
-Student Room Accommodation Platform (SRAP)🏠
-A Hyper-Local Housing & Resource Hub for Students
+# 🏠 Room & Accommodation Booking Platform
 
-SRAP is a full-stack web application designed to simplify off-campus housing for students. It features a modern booking system for PGs/Rooms and a "Campus Guide" to help students locate essential services like hospitals and canteens near their residence.
+A full-stack web application built using **Supabase** and **PostgreSQL** that allows room owners to list accommodations and students/users to browse, compare, and book rooms online.
 
-🏗️ Project Structure
-This repository is organized as a Monorepo:
+This project demonstrates real-world backend concepts like authentication, database design, security policies, and file storage using a modern Backend-as-a-Service approach.
 
-Plaintext
-/student-room-accommodation
-├── /frontend       # Next.js 14+ (App Router), Tailwind CSS, Framer Motion
-├── /backend        # Django REST Framework, PostgreSQL
-├── /docs           # Project Synopsis and Design Diagrams
-└── README.md       # Project Documentation
-🛠️ Technology Stack
-Frontend
-Framework: Next.js 14 (React)
+---
 
-Styling: Tailwind CSS (Responsive Design)
+## 🚀 Features
 
-Animations: Framer Motion
+### 🔐 Authentication
+- Email & password authentication
+- Secure session handling
+- Protected routes
 
-Icons: Lucide React
+### 🏘️ Room Management
+- Room owners can add, update, and delete rooms
+- Upload room images using Supabase Storage
+- Store room features (WiFi, AC, etc.) using JSON
 
-Backend
-Framework: Django REST Framework (DRF)
+### 📅 Booking System
+- Users can book available rooms
+- Prevents double booking using constraints & logic
+- View booking history
 
-Database: PostgreSQL (Primary) / Supabase (Emergency Backup)
+### 🔒 Security (RLS)
+- Row Level Security enabled
+- Users can only access their own data
+- Secure database-level authorization
 
-Authentication: JWT (JSON Web Tokens)
+### ⚡ Realtime Updates
+- Live booking updates using Supabase Realtime
 
-🚀 Getting Started
-Prerequisites
-Node.js (v18+)
+---
 
-Python (v3.10+)
+## 🛠️ Tech Stack
 
-Git
+### Frontend
+- JavaScript / React / Next.js
+- Supabase JavaScript Client
 
-1. Frontend Setup
-Bash
-cd frontend
+### Backend
+- Supabase
+- PostgreSQL
+
+### Database Features Used
+- Relational schema
+- Foreign keys & constraints
+- Indexes for performance
+- JSON / JSONB columns
+- SQL joins & aggregations
+- Functions & triggers (basic)
+
+---
+
+## 🗄️ Database Schema (High Level)
+
+### Tables
+- `users` – authenticated users
+- `rooms` – room listings
+- `bookings` – booking records
+
+### Relationships
+- One user → many rooms
+- One room → many bookings
+- One user → many bookings
+
+---
+
+## 🔐 Security Implementation
+- Row Level Security (RLS) enabled on all tables
+- Policies using `auth.uid()`
+- Public & private storage buckets
+- Server-side validation via PostgreSQL constraints
+
+---
+
+## 📦 Supabase Features Used
+- Authentication
+- PostgreSQL Database
+- Storage Buckets
+- Realtime Subscriptions
+- SQL Editor
+- Row Level Security (RLS)
+
+---
+
+## 📂 Project Structure
+├── frontend/
+│ ├── components/
+│ ├── pages/
+│ ├── utils/
+│ └── supabaseClient.js
+├── database/
+│ ├── schema.sql
+│ └── policies.sql
+└── README.md
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/your-username/room-booking-platform.git
+cd room-booking-platform
+
+2️⃣ Create Supabase Project
+
+Go to Supabase Dashboard
+
+Create a new project
+
+3️⃣ Configure Environment Variables
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+
+4️⃣ Install Dependencies
 npm install
+5️⃣ Run the App
 npm run dev
-The frontend will run at http://localhost:3000.
 
-2. Backend Setup
-Bash
-cd backend
-python -m venv venv
-# Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-The API will run at http://localhost:8000.
 
-✨ Key Modules
-Room Discovery: Advanced filtering by price, amenities, and gender.
+🎯 Learning Outcomes
 
-Owner Dashboard: CRUD operations for property listings.
+Practical PostgreSQL usage
 
-Campus Guide: Interactive local resource locator (Hospitals, Medical Stores, Canteens).
+SQL queries & joins
 
-Responsive UI: Fully optimized for mobile and desktop views.
+Database schema design
 
-👥 The Team
-Yogendra Singh - Frontend Lead (Next.js, UI/UX, Animations)
+Backend security with RLS
 
-Vijay Singh Rawat - Backend Lead (Django, API Design, Database)
+Real-time data handling
 
-Course: MCA (Final Year)
+Full-stack project structure
 
-Department: Computer Science and Engineering
+Copy Project URL and Anon Key
 
-📄 License
-This project is for academic purposes as part of the MCA Final Year curriculum.
+📌 Future Improvements
+
+Payment integration
+
+Admin dashboard
+
+Search & filters
+
+Notification system
+
+Review & rating system
+🙌 Author
+
+Yogendra Bisht
+MCA Student | Full-Stack Developer
+Focused on modern web technologies and backend systems
+
+⭐ If you like this project
+
+Don’t forget to star the repository ⭐
+
+
+---
+
+### 🔥 Pro Tip
+When you push this to GitHub:
+- Add **screenshots**
+- Pin this repo to your profile
+- Mention **PostgreSQL + RLS** in interviews (big plus)
+
+If you want, I can:
+- Customize this README for **Next.js specifically**
+- Make a **resume bullet** from this project
+- Create a **DB schema diagram**
+- Or make a **short project explanation for interviews**
+
+Just tell me 😄🚀
