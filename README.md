@@ -1,4 +1,4 @@
-🏠 Student Room Accommodation Platform (SRAP)
+Student Room Accommodation Platform (SRAP)🏠
 A Hyper-Local Housing & Resource Hub for Students
 
 SRAP is a full-stack web application designed to simplify off-campus housing for students. It features a modern booking system for PGs/Rooms and a "Campus Guide" to help students locate essential services like hospitals and canteens near their residence.
@@ -74,10 +74,3 @@ Department: Computer Science and Engineering
 
 📄 License
 This project is for academic purposes as part of the MCA Final Year curriculum.
-
-Next Steps for you:
-Create the file: In your root folder, create a file named README.md.
-
-Paste & Save: Paste the content above.
-
-Vijay's requirements.txt: Remind Vijay that every time he installs a new library (like django-cors-headers), he should run pip freeze > requirements.txt so you can install it too.
