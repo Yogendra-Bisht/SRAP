@@ -10,7 +10,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', href: '/', icon: <Home size={18} /> },
-    { name: 'Find Rooms', href: '/rooms', icon: <Search size={18} /> },
+    { name: 'Find Rooms', href: '/room', icon: <Search size={18} /> },
     { name: 'Campus Guide', href: '/guide', icon: <Map size={18} /> },
   ];
 
