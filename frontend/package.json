@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "axios": "^1.15.2",
     "framer-motion": "^12.34.1",
     "lucide-react": "^0.564.0",
     "motion": "^12.34.0",
