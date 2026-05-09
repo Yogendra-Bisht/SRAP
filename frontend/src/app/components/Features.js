@@ -17,7 +17,8 @@ const Features = () => {
           <motion.div 
             whileHover={{ y: -10 }}
             key={i} 
-            className="p-8 rounded-3xl bg-white/50 backdrop-blur-md border border-white shadow-lg hover:shadow-2xl transition-all"
+            style={{ willChange: "transform" }}
+            className="p-8 rounded-3xl bg-white/50 border border-white shadow-lg hover:shadow-2xl transition-all"
           >
             <div className="w-12 h-12 rounded-2xl bg-white shadow-inner flex items-center justify-center mb-6">
               {card.icon}

@@ -22,6 +22,7 @@ const RoomSlider = () => {
                 {/* We double the array to create a seamless infinite loop */}
                 <motion.div
                     className="flex gap-6 px-6"
+                    style={{ willChange: "transform" }}
                     animate={{ x: [0, -1035] }}
                     transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 >
