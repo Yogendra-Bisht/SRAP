@@ -11,22 +11,22 @@ const Hero = () => {
       {/* --- Foggy Background Blobs --- */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 ">
         <motion.div 
+          style={{ willChange: "transform" }}
           animate={{ 
             x: [0, 100, 0], 
-            y: [0, 50, 0],
-            scale: [1, 1.2, 1] 
+            y: [0, 50, 0]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute -top-[10%] -left-[10%] w-[500px] h-[500px] bg-teal-200/40 rounded-full blur-[120px]"
         />
         <motion.div 
+          style={{ willChange: "transform" }}
           animate={{ 
             x: [0, -100, 0], 
-            y: [0, 100, 0],
-            scale: [1, 1.3, 1] 
+            y: [0, 100, 0]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[20%] -right-[10%] w-[600px] h-[600px]] bg-orange-200/30 rounded-full blur-[130px]"
+          className="absolute top-[20%] -right-[10%] w-[600px] h-[600px] bg-orange-200/30 rounded-full blur-[130px]"
         />
       </div>
 
