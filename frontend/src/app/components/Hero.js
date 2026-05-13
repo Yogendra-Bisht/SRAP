@@ -1,10 +1,23 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Sparkles } from 'lucide-react';
 
 const Hero = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/room?city=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push('/room');
+    }
+  };
+
   return (
     <section className="relative w-full min-h-[100vh] flex items-center justify-center overflow-hidden bg-slate-50 ">
       
@@ -53,7 +66,8 @@ const Hero = () => {
           </p>
 
           {/* --- Glassmorphism Search Bar --- */}
-          <motion.div 
+          <motion.form 
+            onSubmit={handleSearch}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
@@ -63,18 +77,20 @@ const Hero = () => {
               <MapPin className="text-teal-600" size={20} />
               <input 
                 type="text" 
-                placeholder="Search by college or locality..." 
-                className="bg-transparent border-none outline-none text-slate-800 w-full font-semibold placeholder:text-slate-400"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by city or locality..." 
+                className="bg-transparent border-none outline-none text-slate-800 w-full font-semibold placeholder:text-slate-500"
               />
             </div>
             
-            <div className="h-8 w-1px bg-slate-300 hidden md:block"></div>
+            <div className="h-8 w-[1px] bg-slate-300 hidden md:block"></div>
             
-            <button className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95">
+            <button type="submit" className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-2xl font-black flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95">
               <Search size={20} />
               SEARCH
             </button>
-          </motion.div>
+          </motion.form>
         </motion.div>
       </div>
     </section>

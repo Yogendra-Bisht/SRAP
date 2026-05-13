@@ -38,7 +38,7 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-20 relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4 pt-28 pb-12 relative overflow-hidden">
 
       {/* Background blobs */}
       <motion.div
