@@ -51,10 +51,7 @@ export default function RoommateProfileForm() {
           });
         }
       } catch (err) {
-        // 404 just means they haven't created one yet
-        if (err.response?.status !== 404) {
-          console.error(err);
-        }
+        // 404 just means they haven't created one yet, 401 is handled by interceptor
       } finally {
         setLoading(false);
       }
@@ -82,7 +79,11 @@ export default function RoommateProfileForm() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error saving profile');
+      console.error('Save Profile Error:', err);
+      const errorMessage = err.response?.data?.message 
+        || err.message 
+        || 'Error saving profile';
+      setError(`Failed: ${errorMessage}`);
     } finally {
       setSaving(false);
     }

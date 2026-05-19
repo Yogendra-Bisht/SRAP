@@ -14,6 +14,7 @@ const notFound = (req, res, next) => {
  * Handles Mongoose validation errors, cast errors, and generic errors.
  */
 const errorHandler = (err, req, res, next) => {
+  console.error('[Global Error Handler]:', err);
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message    = err.message;
 
