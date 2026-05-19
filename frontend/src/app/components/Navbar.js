@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Home, Map, Search, Sparkles, LogIn, UserPlus, LogOut, User, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Home, Map, Search, Sparkles, LogIn, UserPlus, LogOut, User, LayoutDashboard, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -16,6 +16,7 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home',         href: '/',      icon: <Home size={18} /> },
     { name: 'Find Rooms',   href: '/room',  icon: <Search size={18} /> },
+    { name: 'Roommate Finder', href: '/roommate-finder', icon: <Users size={18} /> },
     { name: 'Campus Guide', href: '/guide', icon: <Map size={18} /> },
   ];
 
