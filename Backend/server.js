@@ -18,6 +18,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const devRoutes     = require('./routes/devRoutes');
 const uploadRoutes  = require('./routes/uploadRoutes');
 const guideRoutes   = require('./routes/guideRoutes');
+const roommateRoutes = require('./routes/roommateRoutes');
 
 // Error middleware
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
@@ -30,7 +31,9 @@ app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    callback(null, origin || true);
+  },
   credentials: true,
 }));
 
@@ -74,6 +77,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/dev',      devRoutes);
 app.use('/api/upload',   uploadRoutes);
 app.use('/api/guides',   guideRoutes);
+app.use('/api/roommates', roommateRoutes);
 
 // ── 404 + Global error handler (must be last) ─────────────────────────────────
 app.use(notFound);
