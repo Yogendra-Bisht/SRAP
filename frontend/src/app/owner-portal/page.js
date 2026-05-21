@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusCircle, List, BarChart3, Trash2, LogIn,
   MapPin, Home, Wifi, Wind, Car, Droplets,
-  ChefHat, Zap, Camera, Dumbbell, Shield, CheckCircle
+  ChefHat, Zap, Camera, Dumbbell, Shield, CheckCircle,
+  Clock, Mail, Phone, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -45,6 +46,11 @@ export default function OwnerPortal() {
   const [myRooms,      setMyRooms]      = useState([]);
   const [roomsLoading, setRoomsLoading] = useState(true);
 
+  const [myBookings,      setMyBookings]      = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [bookingErr,      setBookingErr]      = useState('');
+
   const [form,    setForm]    = useState(EMPTY_FORM);
   const [saving,  setSaving]  = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -70,9 +76,59 @@ export default function OwnerPortal() {
     finally { setRoomsLoading(false); }
   }, [user]);
 
+  const fetchMyBookings = useCallback(async () => {
+    if (!user) return;
+    setBookingsLoading(true);
+    setBookingErr('');
+    try {
+      const res = await api.get('/bookings/owner');
+      setMyBookings(res.data.bookings || []);
+    } catch (err) {
+      setBookingErr(err.response?.data?.message || 'Could not fetch booking requests.');
+    } finally {
+      setBookingsLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
-    if (user) fetchMyRooms();
-  }, [user, fetchMyRooms]);
+    if (user) {
+      fetchMyRooms();
+      fetchMyBookings();
+    }
+  }, [user, fetchMyRooms, fetchMyBookings]);
+
+  const handleAcceptBooking = async (bookingId) => {
+    setActionLoadingId(bookingId);
+    setBookingErr('');
+    try {
+      await api.patch(`/bookings/${bookingId}/accept`);
+      setMyBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? { ...b, status: 'confirmed' } : b))
+      );
+      fetchMyRooms(); // Refresh rooms to update stats/availability status
+    } catch (err) {
+      setBookingErr(err.response?.data?.message || 'Failed to accept booking.');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleRejectBooking = async (bookingId) => {
+    if (!confirm('Are you sure you want to deny/reject this booking request?')) return;
+    setActionLoadingId(bookingId);
+    setBookingErr('');
+    try {
+      await api.patch(`/bookings/${bookingId}/reject`);
+      setMyBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? { ...b, status: 'rejected' } : b))
+      );
+      fetchMyRooms(); // Refresh rooms to update stats/availability status
+    } catch (err) {
+      setBookingErr(err.response?.data?.message || 'Failed to deny booking.');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
 
   // ── Form handlers ──────────────────────────────────────────────────────────
   const handleChange = (e) =>
@@ -196,11 +252,12 @@ export default function OwnerPortal() {
           <p className="text-slate-400 font-medium">Manage your listings and connect with students.</p>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             {[
               { label: 'Active Listings',   value: myRooms.filter((r) => r.isAvailable).length, icon: <List size={20} /> },
               { label: 'Total Listings',    value: myRooms.length,                               icon: <Home size={20} /> },
               { label: 'Booked Rooms',      value: myRooms.filter((r) => !r.isAvailable).length, icon: <BarChart3 size={20} /> },
+              { label: 'Pending Bookings',  value: myBookings.filter((b) => b.status === 'pending').length, icon: <Clock size={20} /> },
             ].map((s) => (
               <div key={s.label} className="bg-white/10 backdrop-blur border border-white/10 p-5 rounded-2xl flex items-center gap-4">
                 <div className="text-teal-400">{s.icon}</div>
@@ -213,9 +270,10 @@ export default function OwnerPortal() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-3 mt-8">
+          <div className="flex gap-3 mt-8 flex-wrap">
             {[
               { key: 'dashboard', label: '📋 My Listings' },
+              { key: 'bookings',  label: '📅 Booking Requests' },
               { key: 'add',       label: '➕ Add New Room' },
             ].map((t) => (
               <button
@@ -318,6 +376,166 @@ export default function OwnerPortal() {
                       </div>
                     </motion.div>
                   ))}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ── Bookings Tab ── */}
+          {tab === 'bookings' && (
+            <motion.div
+              key="bookings"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              className="space-y-6"
+            >
+              {bookingErr && (
+                <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold">
+                  {bookingErr}
+                </div>
+              )}
+
+              {bookingsLoading ? (
+                <div className="grid grid-cols-1 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 animate-pulse h-48" />
+                  ))}
+                </div>
+              ) : myBookings.length === 0 ? (
+                <div className="text-center py-24 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                  <div className="text-6xl mb-4">📅</div>
+                  <h3 className="text-2xl font-black text-slate-700 mb-2">No booking requests</h3>
+                  <p className="text-slate-500 font-medium">When students request to book your rooms, they will show up here.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
+                  {myBookings.map((b, i) => {
+                    const roomImg = b.room?.images?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500';
+                    const isPending = b.status === 'pending';
+                    const isConfirmed = b.status === 'confirmed';
+                    const isRejected = b.status === 'rejected';
+                    const isCancelled = b.status === 'cancelled';
+
+                    return (
+                      <motion.div
+                        key={b._id}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="bg-white rounded-3xl p-6 shadow-md border border-slate-100 flex flex-col md:flex-row gap-6 items-stretch overflow-hidden relative hover:shadow-lg transition-shadow duration-300"
+                      >
+                        {/* Status top indicator */}
+                        {isConfirmed && <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-teal-500 to-emerald-500" />}
+                        {isRejected && <div className="absolute top-0 left-0 right-0 h-1.5 bg-rose-500" />}
+                        {isCancelled && <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-400" />}
+                        {isPending && <div className="absolute top-0 left-0 right-0 h-1.5 bg-amber-400" />}
+
+                        {/* Room Image */}
+                        <div className="w-full md:w-64 shrink-0 relative rounded-2xl overflow-hidden aspect-video md:aspect-auto min-h-[140px] bg-slate-100">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={roomImg} alt={b.room?.title} className="object-cover w-full h-full" />
+                          <div className="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur text-white px-3 py-1 rounded-xl text-xs font-black">
+                            ₹{b.room?.price?.toLocaleString('en-IN') || 0}/mo
+                          </div>
+                        </div>
+
+                        {/* Middle: Details */}
+                        <div className="flex-1 flex flex-col justify-between gap-4 w-full">
+                          <div>
+                            <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                              <div>
+                                <h4 className="text-lg font-black text-slate-800 line-clamp-1">{b.room?.title || 'Unknown Room'}</h4>
+                                <p className="text-slate-500 text-xs flex items-center gap-1 mt-0.5 font-semibold">
+                                  <MapPin size={12} className="text-teal-500" />
+                                  {b.room?.location?.address}, {b.room?.location?.city}
+                                </p>
+                              </div>
+                              <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                                isPending ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                isConfirmed ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
+                                isRejected ? 'bg-rose-100 text-rose-700 border border-rose-200' :
+                                'bg-slate-100 text-slate-600 border border-slate-200'
+                              }`}>
+                                {isPending ? 'Pending Approval' : isConfirmed ? 'Confirmed' : isRejected ? 'Denied' : 'Cancelled'}
+                              </span>
+                            </div>
+
+                            {/* Dates details */}
+                            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100/50 flex flex-wrap items-center gap-x-8 gap-y-3 mt-3 text-xs">
+                              <div>
+                                <span className="text-slate-400 font-bold block uppercase tracking-wider mb-0.5">Check-in</span>
+                                <span className="font-black text-slate-700">
+                                  {new Date(b.checkIn).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              </div>
+                              {b.checkOut && (
+                                <div className="md:border-l md:border-slate-200 md:pl-8">
+                                  <span className="text-slate-400 font-bold block uppercase tracking-wider mb-0.5">Check-out</span>
+                                  <span className="font-black text-slate-700">
+                                    {new Date(b.checkOut).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </span>
+                                </div>
+                              )}
+                              <div className="md:border-l md:border-slate-200 md:pl-8">
+                                <span className="text-slate-400 font-bold block uppercase tracking-wider mb-0.5">Total Price</span>
+                                <span className="font-black text-teal-600 text-sm">₹{b.totalPrice?.toLocaleString('en-IN') || 0}</span>
+                              </div>
+                            </div>
+
+                            {/* Student Profile Info */}
+                            <div className="mt-4 border-t border-slate-100 pt-3">
+                              <p className="text-xs text-slate-400 font-black uppercase tracking-wider mb-2">Student Details</p>
+                              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-700">
+                                <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                  <div className="h-6 w-6 rounded-full bg-teal-100 text-teal-700 text-xs font-black flex items-center justify-center">
+                                    {b.student?.name?.[0]?.toUpperCase() || 'S'}
+                                  </div>
+                                  {b.student?.name || 'Unknown Student'}
+                                </div>
+                                <a href={`mailto:${b.student?.email}`} className="text-xs text-slate-500 hover:text-teal-600 flex items-center gap-1 transition">
+                                  <Mail size={13} className="text-teal-500" /> {b.student?.email}
+                                </a>
+                                {b.student?.phone && (
+                                  <a href={`tel:${b.student.phone}`} className="text-xs text-slate-500 hover:text-teal-600 flex items-center gap-1 transition">
+                                    <Phone size={13} className="text-teal-500" /> {b.student.phone}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Student Message */}
+                            {b.message && (
+                              <div className="mt-3 bg-teal-50/40 border border-teal-100/40 rounded-2xl p-3 text-xs italic text-slate-600 flex gap-2">
+                                <MessageSquare size={14} className="text-teal-500 shrink-0 mt-0.5" />
+                                <span>"{b.message}"</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Action buttons (only if pending) */}
+                          {isPending && (
+                            <div className="flex justify-end gap-3 mt-2">
+                              <button
+                                disabled={actionLoadingId !== null}
+                                onClick={() => handleRejectBooking(b._id)}
+                                className="px-5 py-2.5 rounded-xl border-2 border-red-100 hover:border-red-500 hover:bg-red-50 text-red-600 text-xs font-black transition disabled:opacity-50 cursor-pointer duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                              >
+                                {actionLoadingId === b._id ? 'Processing...' : 'Deny Request'}
+                              </button>
+                              <button
+                                disabled={actionLoadingId !== null}
+                                onClick={() => handleAcceptBooking(b._id)}
+                                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white text-xs font-black shadow transition disabled:opacity-50 cursor-pointer duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                              >
+                                {actionLoadingId === b._id ? 'Processing...' : 'Accept Booking'}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </motion.div>

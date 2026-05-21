@@ -65,7 +65,14 @@ const createBooking = async (req, res, next) => {
 const getMyBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find({ student: req.user._id })
-      .populate('room', 'title location price images')
+      .populate({
+        path: 'room',
+        select: 'title location price images owner',
+        populate: {
+          path: 'owner',
+          select: 'name email phone',
+        },
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({ count: bookings.length, bookings });
@@ -135,4 +142,100 @@ const cancelBooking = async (req, res, next) => {
   }
 };
 
-module.exports = { createBooking, getMyBookings, getBookingById, cancelBooking };
+// ─── @route   GET /api/bookings/owner ──────────────────────────────────────────
+// ─── @access  Private (Landlord only)
+const getOwnerBookings = async (req, res, next) => {
+  try {
+    // 1. Find all rooms owned by this landlord
+    const rooms = await Room.find({ owner: req.user._id });
+    const roomIds = rooms.map((r) => r._id);
+
+    // 2. Find bookings for these rooms
+    const bookings = await Booking.find({ room: { $in: roomIds } })
+      .populate('room', 'title location price images')
+      .populate('student', 'name email phone')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ count: bookings.length, bookings });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── @route   PATCH /api/bookings/:id/accept ──────────────────────────────────
+// ─── @access  Private (Landlord only)
+const acceptBooking = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('room');
+
+    if (!booking) {
+      res.status(404);
+      throw new Error('Booking not found');
+    }
+
+    // Verify if the landlord owns the room associated with the booking
+    if (booking.room.owner.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorised — you do not own the room for this booking');
+    }
+
+    if (booking.status === 'confirmed') {
+      res.status(400);
+      throw new Error('Booking is already confirmed');
+    }
+
+    booking.status = 'confirmed';
+    await booking.save();
+
+    // Ensure room is set to unavailable
+    await Room.findByIdAndUpdate(booking.room._id, { isAvailable: false });
+
+    res.status(200).json({ message: 'Booking confirmed successfully', booking });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── @route   PATCH /api/bookings/:id/reject ──────────────────────────────────
+// ─── @access  Private (Landlord only)
+const rejectBooking = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('room');
+
+    if (!booking) {
+      res.status(404);
+      throw new Error('Booking not found');
+    }
+
+    // Verify if the landlord owns the room associated with the booking
+    if (booking.room.owner.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorised — you do not own the room for this booking');
+    }
+
+    if (booking.status === 'rejected') {
+      res.status(400);
+      throw new Error('Booking is already rejected/denied');
+    }
+
+    booking.status = 'rejected';
+    await booking.save();
+
+    // Restore room availability
+    await Room.findByIdAndUpdate(booking.room._id, { isAvailable: true });
+
+    res.status(200).json({ message: 'Booking rejected/denied successfully', booking });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  createBooking,
+  getMyBookings,
+  getBookingById,
+  cancelBooking,
+  getOwnerBookings,
+  acceptBooking,
+  rejectBooking,
+};
