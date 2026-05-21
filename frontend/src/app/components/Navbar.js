@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Home, Map, Search, Sparkles, LogIn, UserPlus, LogOut, User, LayoutDashboard, Users } from 'lucide-react';
+import { Menu, X, Home, Map, Search, Sparkles, LogIn, UserPlus, LogOut, User, LayoutDashboard, Users, CalendarDays } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -111,9 +111,15 @@ const Navbar = () => {
                             </div>
                           </Link>
                         )}
+                        <Link href="/my-bookings" onClick={() => setUserMenu(false)}>
+                          <div className="flex items-center gap-2 px-4 py-3 text-sm text-slate-700 font-bold hover:bg-slate-50 transition cursor-pointer border-t border-slate-100">
+                            <CalendarDays size={16} className="text-slate-500" />
+                            My Bookings
+                          </div>
+                        </Link>
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 font-bold hover:bg-red-50 transition"
+                          className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-500 font-bold hover:bg-red-50 transition border-t border-slate-100"
                         >
                           <LogOut size={16} />
                           Sign Out
@@ -183,13 +189,27 @@ const Navbar = () => {
             ))}
 
             {user ? (
-              <motion.div variants={itemVariants}>
+              <motion.div variants={itemVariants} className="flex flex-col gap-2">
                 <div className="px-4 py-2 text-sm text-slate-500 font-semibold">
                   Signed in as <span className="text-teal-600">{user.name}</span>
                 </div>
+                {user.role === 'landlord' && (
+                  <Link href="/owner-portal" onClick={() => setIsOpen(false)}>
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-teal-50 text-teal-700 font-bold border border-teal-100 cursor-pointer">
+                      <LayoutDashboard size={18} />
+                      Owner Portal
+                    </div>
+                  </Link>
+                )}
+                <Link href="/my-bookings" onClick={() => setIsOpen(false)}>
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 text-slate-800 font-bold border border-slate-100 cursor-pointer">
+                    <CalendarDays size={18} className="text-slate-500" />
+                    My Bookings
+                  </div>
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 mt-1 bg-red-500 text-white py-4 rounded-2xl font-black shadow-xl"
+                  className="w-full flex items-center justify-center gap-2 mt-2 bg-red-500 text-white py-4 rounded-2xl font-black shadow-xl cursor-pointer"
                 >
                   <LogOut size={18} />
                   Sign Out
