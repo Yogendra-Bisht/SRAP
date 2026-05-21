@@ -1,176 +1,176 @@
-# 🏠 Room & Accommodation Booking Platform
+# 🏠 NEST - Student Room & Accommodation Portal (SRAP)
 
-A full-stack web application built using **Supabase** and **PostgreSQL** that allows room owners to list accommodations and students/users to browse, compare, and book rooms online.
+A modern full-stack student accommodation portal built using the **MERN Stack** (MongoDB, Express, Next.js, Node.js). NEST allows university students to discover verified off-campus housing, find compatible roommates, read local campus guides, and book accommodations directly from room owners.
 
-This project demonstrates real-world backend concepts like authentication, database design, security policies, and file storage using a modern Backend-as-a-Service approach.
-
----
-
-## 🚀 Features
-
-### 🔐 Authentication
-- Email & password authentication
-- Secure session handling
-- Protected routes
-
-### 🏘️ Room Management
-- Room owners can add, update, and delete rooms
-- Upload room images using Supabase Storage
-- Store room features (WiFi, AC, etc.) using JSON
-
-### 📅 Booking System
-- Users can book available rooms
-- Prevents double booking using constraints & logic
-- View booking history
-
-### 🔒 Security (RLS)
-- Row Level Security enabled
-- Users can only access their own data
-- Secure database-level authorization
-
-### ⚡ Realtime Updates
-- Live booking updates using Supabase Realtime
+This project demonstrates robust backend architecture, relational schema modeling with NoSQL, JWT-based security, API middleware protections, and responsive frontend UI components.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Key Features
+
+### 🔐 Secure Authentication & Authorization
+- JWT-based authentication with secure session handling.
+- Secure password hashing using `bcryptjs`.
+- Separate role-based access control for **Students** and **Landlords/Property Owners**.
+- Custom auth middlewares for route protection.
+
+### 🏘️ Room & Property Listings
+- Comprehensive room listings detailing pricing, amenities (Wi-Fi, AC, Meals, etc.), room type, and gender preferences.
+- Image uploads handled securely via Cloud storage using **Cloudinary**.
+- Dynamic search and filter options by location, price, and category.
+
+### 📅 Booking Management
+- Direct room booking functionality for students.
+- Multi-step validation to prevent double-booking.
+- Landlord dashboard to manage incoming bookings (Approve, Reject, or Cancel).
+
+### 🤝 Roommate Finder
+- Custom lifestyle profiles for students (lifestyle habits, sleep schedule, cleanliness, budget, smoking/drinking preferences).
+- Compatibility browsing for students to locate and connect with potential roommates.
+
+### 📖 Campus Guides & Blogs
+- Community hub with guides categorized by food/cafes, hospitals, pharmacies, study spots, and other student essentials.
+- Interactive comment sections and likes to foster campus community engagement.
+
+---
+
+## 🛠️ Technology Stack
 
 ### Frontend
-- JavaScript / React / Next.js
-- Supabase JavaScript Client
+- **Framework**: Next.js (App Router)
+- **Styling**: Tailwind CSS & Vanilla CSS
+- **Animations**: Framer Motion (for smooth micro-animations and transitions)
+- **API Client**: Axios
 
 ### Backend
-- Supabase
-- PostgreSQL
-
-### Database Features Used
-- Relational schema
-- Foreign keys & constraints
-- Indexes for performance
-- JSON / JSONB columns
-- SQL joins & aggregations
-- Functions & triggers (basic)
+- **Framework**: Node.js & Express.js
+- **Database**: MongoDB Atlas & Mongoose ODM
+- **Media Storage**: Cloudinary
+- **Emails**: Resend API
 
 ---
 
-## 🗄️ Database Schema (High Level)
-
-### Tables
-- `users` – authenticated users
-- `rooms` – room listings
-- `bookings` – booking records
-
-### Relationships
-- One user → many rooms
-- One room → many bookings
-- One user → many bookings
+## 🔐 Security & API Best Practices
+- **Helmet**: Adds secure HTTP headers to prevent common vulnerabilities (XSS, clickjacking, etc.).
+- **Express Rate Limiter**: Rate-limits API requests to prevent brute-force attacks and DDoS attempts.
+- **Express Validator**: Robust input sanitization and verification on API endpoints.
+- **CORS**: Secured Cross-Origin Resource Sharing policy between Next.js and Express server.
 
 ---
 
-## 🔐 Security Implementation
-- Row Level Security (RLS) enabled on all tables
-- Policies using `auth.uid()`
-- Public & private storage buckets
-- Server-side validation via PostgreSQL constraints
+## 🗄️ Database Schema Reference (Mongoose models)
 
----
-
-## 📦 Supabase Features Used
-- Authentication
-- PostgreSQL Database
-- Storage Buckets
-- Realtime Subscriptions
-- SQL Editor
-- Row Level Security (RLS)
+- **User**: Name, email, hashed password, role (student/landlord), phone, and avatar.
+- **Room**: Title, description, price, location details, images array, amenities, availability, and owner ID reference.
+- **Booking**: Links user (student) and room, including booking dates, rent details, and approval status (pending, confirmed, cancelled).
+- **RoommateProfile**: References user and records budget, habits, biography, and roommate preferences.
+- **GuidePost**: Title, content, category, author reference, likes, and comment threads.
 
 ---
 
 ## 📂 Project Structure
+
+```text
+├── Backend/
+│   ├── config/          # DB connection configuration
+│   ├── controllers/     # Route controller logic
+│   ├── middleware/      # Auth gates, validation guards, and rate limiters
+│   ├── models/          # Mongoose database models
+│   ├── routes/          # Express API route handlers
+│   ├── server.js        # Entry point for backend Express app
+│   └── package.json
 ├── frontend/
-│ ├── components/
-│ ├── pages/
-│ ├── utils/
-│ └── supabaseClient.js
-├── database/
-│ ├── schema.sql
-│ └── policies.sql
+│   ├── public/          # Static assets
+│   ├── src/
+│   │   └── app/
+│   │       ├── components/ # Reusable UI components (TrustBanner, RoomSlider, etc.)
+│   │       ├── context/    # Global AuthContext provider
+│   │       ├── layout.js   # Root layout & page head metadata
+│   │       ├── page.js     # Home page structure
+│   │       └── [routes]/   # Next.js App routes (login, signup, room, owner-portal)
+│   └── package.json
 └── README.md
+```
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Setup & Installation
 
-### 1️⃣ Clone the Repository
-```bash
-git clone https://github.com/your-username/room-booking-platform.git
-cd room-booking-platform
+### 1️⃣ Run the Backend Server
+1. Navigate to the backend directory:
+   ```bash
+   cd Backend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file in the `Backend` directory and configure the variables:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret_key
+   DEV_SECRET=nest_dev_monitor_2024
+   APP_URL=http://localhost:3000
+   CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+   CLOUDINARY_API_KEY=your_cloudinary_key
+   CLOUDINARY_API_SECRET=your_cloudinary_secret
+   RESEND_API_KEY=your_resend_key
+   ```
+4. Start the developer server:
+   ```bash
+   npm run dev
+   ```
 
-2️⃣ Create Supabase Project
+### 2️⃣ Run the Next.js Frontend
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Configure the `.env.local` file in the `frontend` directory:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   ```
+4. Start the frontend developer server:
+   ```bash
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-Go to Supabase Dashboard
+---
 
-Create a new project
+## 🎯 Learning Outcomes
+- Relational data integrity inside a document-oriented NoSQL database (using Mongoose Populate).
+- Token-based stateless authentication flow (JWT + HttpOnly Cookie / Authorization Headers).
+- Middleware-driven architectures for security (rate limiters, headers, role verification).
+- Building premium, responsive React layouts using Next.js App Router and Framer Motion.
 
-3️⃣ Configure Environment Variables
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+---
 
-4️⃣ Install Dependencies
-npm install
-5️⃣ Run the App
-npm run dev
+## 📌 Future Improvements
+- **Payment Gateway**: Integration of payment processing system (e.g. Stripe or Razorpay) for bookings.
+- **In-App Messaging**: Real-time messaging service between students and room owners.
+- **Advanced Maps Integration**: Integrating Google Maps API to search properties visually.
+- **Notification Engine**: Email and SMS alerts for booking confirmations.
 
+---
 
-🎯 Learning Outcomes
+## 🙌 Author
 
-Practical PostgreSQL usage
-
-SQL queries & joins
-
-Database schema design
-
-Backend security with RLS
-
-Real-time data handling
-
-Full-stack project structure
-
-Copy Project URL and Anon Key
-
-📌 Future Improvements
-
-Payment integration
-
-Admin dashboard
-
-Search & filters
-
-Notification system
-
-Review & rating system
-🙌 Author
-
-Yogendra Bisht
+**Yogendra Bisht**
 MCA Student | Full-Stack Developer
-Focused on modern web technologies and backend systems
+Focused on modern web technologies and backend systems.
 
-⭐ If you like this project
-
-Don’t forget to star the repository ⭐
-
+⭐ **If you like this project, don’t forget to star the repository!**
 
 ---
 
-### 🔥 Pro Tip
-When you push this to GitHub:
-- Add **screenshots**
-- Pin this repo to your profile
-- Mention **PostgreSQL + RLS** in interviews (big plus)
-
-If you want, I can:
-- Customize this README for **Next.js specifically**
-- Make a **resume bullet** from this project
-- Create a **DB schema diagram**
-- Or make a **short project explanation for interviews**
-
-Just tell me 😄🚀
+### 🔥 Pro Tip for Interviews / Presentation
+When showcasing this project:
+- Highlight **Mongoose population references** and database design.
+- Explain the **JWT Auth middleware flow** and how route guards protect your API.
+- Talk about the **API Security features** (Helmet headers, Express Rate Limits, and input validators).
