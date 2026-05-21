@@ -11,27 +11,31 @@ const AnimatedNumber = ({ value }) => {
         if (isInView) {
             let start = 0;
             const end = parseInt(value, 10);
+            if (end === 0 || isNaN(end)) {
+                setDisplayValue(0);
+                return;
+            }
             const duration = 2000;
-            const incrementTime = Math.abs(Math.floor(duration / end));
+            let timer;
 
-            const timer = setInterval(() => {
-                start += 1;
-                setDisplayValue(start);
-                if (start === end) clearInterval(timer);
-            }, incrementTime);
-            
-            // Fallback for very large numbers to avoid long loops
-            if(end > 500) {
-               const fastTimer = setInterval(() => {
-                  start += Math.ceil(end/50);
-                  if (start >= end) {
-                      setDisplayValue(end);
-                      clearInterval(fastTimer);
-                  } else {
-                      setDisplayValue(start);
-                  }
-               }, 40);
-               clearInterval(timer);
+            if (end > 500) {
+                const step = Math.ceil(end / 50);
+                timer = setInterval(() => {
+                    start += step;
+                    if (start >= end) {
+                        setDisplayValue(end);
+                        clearInterval(timer);
+                    } else {
+                        setDisplayValue(start);
+                    }
+                }, 40);
+            } else {
+                const incrementTime = Math.abs(Math.floor(duration / end));
+                timer = setInterval(() => {
+                    start += 1;
+                    setDisplayValue(start);
+                    if (start === end) clearInterval(timer);
+                }, incrementTime);
             }
 
             return () => clearInterval(timer);
@@ -56,9 +60,9 @@ const TrustBanner = () => {
                     transition={{ delay: 0.1 }}
                 >
                     <h4 className="text-5xl font-black text-white drop-shadow-md">
-                        <AnimatedNumber value="500" />+
+                        <AnimatedNumber value="100" />%
                     </h4>
-                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Verified Rooms</p>
+                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Verified Listings</p>
                 </motion.div>
 
                 <motion.div 
@@ -68,9 +72,9 @@ const TrustBanner = () => {
                     transition={{ delay: 0.2 }}
                 >
                     <h4 className="text-5xl font-black text-white drop-shadow-md">
-                        <AnimatedNumber value="1200" />+
+                        <AnimatedNumber value="0" />%
                     </h4>
-                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Happy Students</p>
+                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Brokerage Fees</p>
                 </motion.div>
 
                 <motion.div 
@@ -80,9 +84,9 @@ const TrustBanner = () => {
                     transition={{ delay: 0.3 }}
                 >
                     <h4 className="text-5xl font-black text-white drop-shadow-md">
-                        <AnimatedNumber value="15" />+
+                        <AnimatedNumber value="24" />/7
                     </h4>
-                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Colleges Covered</p>
+                    <p className="text-teal-100 font-bold uppercase text-xs tracking-widest mt-3">Active Support</p>
                 </motion.div>
             </div>
         </section>
