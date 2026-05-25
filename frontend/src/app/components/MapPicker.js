@@ -86,6 +86,62 @@ export default function MapPicker({ value, onChange, cityHint = '', addressHint 
     }
   }, [value]);
 
+  // Geolocation handler to fetch device coordinates
+  const handleGetCurrentLocation = () => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setSearchError('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setSearching(true);
+    setSearchError('');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        onChange({ lat: latitude, lng: longitude });
+        setSearching(false);
+      },
+      (error) => {
+        setSearching(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setSearchError('Location permission denied. Please allow location access in your browser settings.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setSearchError('Location information is unavailable.');
+            break;
+          case error.TIMEOUT:
+            setSearchError('Location request timed out.');
+            break;
+          default:
+            setSearchError('Failed to retrieve location.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
+  // Auto-detect current location on mount if no initial coordinates are set
+  useEffect(() => {
+    if (!value?.lat && !value?.lng && typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          onChange({ lat: latitude, lng: longitude });
+        },
+        (error) => {
+          console.warn('Geolocation auto-detect failed:', error.message);
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
+  }, []);
+
   // Geocoding function using OSM Nominatim API
   const handleSearch = async (e) => {
     if (e) e.preventDefault();
@@ -118,7 +174,7 @@ export default function MapPicker({ value, onChange, cityHint = '', addressHint 
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <input
           id="map-search-query"
           type="text"
@@ -127,14 +183,24 @@ export default function MapPicker({ value, onChange, cityHint = '', addressHint 
           placeholder="Search location to position pin..."
           className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-teal-300 transition"
         />
-        <button
-          type="button"
-          onClick={handleSearch}
-          disabled={searching}
-          className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-60 flex items-center justify-center shrink-0 cursor-pointer"
-        >
-          {searching ? 'Searching...' : 'Locate'}
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleSearch}
+            disabled={searching}
+            className="flex-1 sm:flex-initial px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-60 flex items-center justify-center cursor-pointer"
+          >
+            {searching ? 'Searching...' : 'Locate'}
+          </button>
+          <button
+            type="button"
+            onClick={handleGetCurrentLocation}
+            disabled={searching}
+            className="flex-1 sm:flex-initial px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-60 flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            🎯 My Location
+          </button>
+        </div>
       </div>
 
       {searchError && (

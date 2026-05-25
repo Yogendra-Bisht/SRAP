@@ -1,12 +1,21 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Copy } from 'lucide-react';
 
 export default function MapView({ latitude, longitude, address = '', city = '' }) {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyCoordinates = () => {
+    if (typeof window !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(`${latitude}, ${longitude}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // SVG Custom Pin
   const customPin = L.divIcon({
@@ -92,6 +101,21 @@ export default function MapView({ latitude, longitude, address = '', city = '' }
 
       <div className="relative rounded-2xl overflow-hidden border border-slate-100 shadow-inner">
         <div ref={mapRef} className="h-64 w-full z-10" />
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-xs">
+        <div className="font-semibold text-slate-600 flex items-center gap-1.5">
+          <span className="font-bold text-slate-400 tracking-wider">COORDINATES:</span>
+          <span className="font-mono text-slate-700 bg-slate-200/50 px-2 py-0.5 rounded">{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopyCoordinates}
+          className="bg-white hover:bg-slate-100 text-teal-600 border border-slate-200 px-3 py-1.5 rounded-xl font-bold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
+        >
+          <Copy size={12} className={copied ? 'text-emerald-500' : ''} />
+          {copied ? 'Copied!' : 'Copy Coordinates'}
+        </button>
       </div>
     </div>
   );
