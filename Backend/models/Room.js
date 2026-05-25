@@ -21,6 +21,17 @@ const roomSchema = new mongoose.Schema(
       city:    { type: String, required: true },
       state:   { type: String },
       pincode: { type: String },
+      coordinates: {
+        type: {
+          type: String,
+          enum: ['Point'],
+          default: 'Point'
+        },
+        coordinates: {
+          type: [Number], // [longitude, latitude]
+          default: [77.2090, 28.6139] // Default New Delhi coordinates
+        }
+      }
     },
     images: [
       {

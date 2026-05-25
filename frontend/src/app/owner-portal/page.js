@@ -12,6 +12,9 @@ import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '../lib/api';
+import dynamic from 'next/dynamic';
+
+const MapPicker = dynamic(() => import('../components/MapPicker'), { ssr: false });
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const ROOM_TYPES  = ['Single', 'Double', 'Triple', 'Dormitory', 'Studio'];
@@ -35,6 +38,8 @@ const EMPTY_FORM = {
   address: '', city: '', state: '', pincode: '',
   amenities: [],
   images: '',       // comma-separated URLs for now
+  lat: null,
+  lng: null,
 };
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
@@ -159,6 +164,13 @@ export default function OwnerPortal() {
           city:    form.city,
           state:   form.state,
           pincode: form.pincode,
+          coordinates: {
+            type: 'Point',
+            coordinates: [
+              form.lng ? Number(form.lng) : 77.2090, // longitude first
+              form.lat ? Number(form.lat) : 28.6139  // latitude second
+            ]
+          }
         },
         amenities: form.amenities,
         images: form.images ? form.images.split(',').map((u) => u.trim()).filter(Boolean) : [],
@@ -640,6 +652,15 @@ export default function OwnerPortal() {
                         <input id="room-pincode" name="pincode" value={form.pincode} onChange={handleChange}
                           placeholder="e.g. 110001" className="input-field" />
                       </div>
+                    </div>
+                    <div className="pt-2">
+                      <label className="text-xs font-bold text-slate-500 block mb-1.5">Pin Room Location on Map</label>
+                      <MapPicker
+                        value={{ lat: form.lat, lng: form.lng }}
+                        onChange={({ lat, lng }) => setForm(p => ({ ...p, lat, lng }))}
+                        cityHint={form.city}
+                        addressHint={form.address}
+                      />
                     </div>
                   </section>
 
