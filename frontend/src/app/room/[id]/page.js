@@ -11,6 +11,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import api from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
+import dynamic from 'next/dynamic';
+
+const MapView = dynamic(() => import('../../components/MapView'), { ssr: false });
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500';
 
@@ -103,6 +106,10 @@ export default function RoomDetailsPage({ params }) {
   const city     = room.location?.city    || '';
   const address  = room.location?.address || '';
   const location = [address, city, room.location?.state].filter(Boolean).join(', ');
+
+  const coords   = room.location?.coordinates?.coordinates || [];
+  const longitude = coords[0];
+  const latitude  = coords[1];
 
   return (
     <div className="min-h-screen bg-slate-50 pb-20">
@@ -215,6 +222,14 @@ export default function RoomDetailsPage({ params }) {
               </p>
             </div>
           </div>
+
+          {/* Map View */}
+          <MapView
+            latitude={latitude}
+            longitude={longitude}
+            address={address}
+            city={city}
+          />
         </div>
 
         {/* Right — booking card */}
